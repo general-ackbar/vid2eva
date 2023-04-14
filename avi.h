@@ -1,0 +1,11 @@
+bool CloseAVI();
+bool OpenAVI(char* lpszFile);
+void AVISetVideoSize(int nWidth, int nHeight);
+int AVIGetVideoFrame();
+int AVIGetVideoRate();
+int AVIGetVideoScale();
+int AVIGetVideoWidth();
+int AVIGetVideoHeight();
+bool AVIIsEndAudio();
+bool AVIReadVideo(void* lpDst, int nFrame);
+bool AVIReadAudio(void* lpDst, int nSize);
