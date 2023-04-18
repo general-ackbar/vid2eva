@@ -1,6 +1,9 @@
-#include "defs.h"
+#include <string.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
 
-BOOL CloseEVA();
-BOOL CreateEVA(LPCSTR lpszFilename, BOOL bEnh);
-BOOL AppendEVA();
-BOOL ConvEva(LPVOID lpSurface, int nWidth, int nHeight, LPVOID lpSound, int nSize, BOOL bDither, BOOL bMono);
+bool CloseEVA();
+bool CreateEVA(const char * lpszFilename, bool bEnh);
+bool AppendEVA();
+bool ConvEva(void* lpSurface, int nWidth, int nHeight, void* lpSound, int nSize, bool bDither, bool bMono);

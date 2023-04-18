@@ -1,14 +1,12 @@
-#include "defs.h"
-#include <stdio.h>
-#include <unistd.h>
-#include <fcntl.h>
+#include "eva.h"
 
 
-BYTE	EvaBuff[0x3C00];
-BYTE	EvaBuffTmp[0x3C00];
-//HANDLE	hFileEva;
+#define INVALID_HANDLE -1
+
+unsigned char	EvaBuff[0x3C00];
+unsigned char	EvaBuffTmp[0x3C00];
 int    hFileEva;
-BOOL	bEnhance;
+bool	bEnhance;
 
 
 int		nDitherPattern[4][4] = {
@@ -19,10 +17,10 @@ int		nDitherPattern[4][4] = {
 		};
 
 
-BOOL convYJKMonoDither(LPBYTE lpDst, LPVOID lpSurface, int nWidth, int nHeight)
+bool convYJKMonoDither(unsigned char* lpDst, void* lpSurface, int nWidth, int nHeight)
 {
 	int		u, v;
-	LPBYTE	lpSrc;
+	unsigned char*	lpSrc;
 	int		nGap = nWidth - 128;
 	int		nBorder0, nBorder1;
 
@@ -31,32 +29,32 @@ BOOL convYJKMonoDither(LPBYTE lpDst, LPVOID lpSurface, int nWidth, int nHeight)
 	nBorder1 = nBorder0 + nHeight;
 	if(nBorder1 > 106) nBorder1 = 106;
 
-	lpSrc = (LPBYTE)lpSurface + (nGap / 2) * 3;
+	lpSrc = (unsigned char*)lpSurface + (nGap / 2) * 3;
 	if(nBorder0 == 0) lpSrc += ((nHeight - 106) / 2) * 3;
 	lpSrc += ((nHeight-1) * nWidth * 3);
 	nGap *= 3;
 
 	for(v = 0; v < 106; v++){
 		if(v < nBorder0 || v >= nBorder1){
-			ZeroMemory(lpDst, 128);
+			memset(lpDst, 0, 128);
 			lpDst+=128;
 		} else {
 			for(u = 0; u < 128; u++){
-				*lpDst++ = (BYTE)((*lpSrc + nDitherPattern[v&3][u&3]) & 0xF8);
+				*lpDst++ = (unsigned char)((*lpSrc + nDitherPattern[v&3][u&3]) & 0xF8);
 				lpSrc+=3;
 			}
 			lpSrc += nGap;
 			lpSrc -= nWidth * 6;
 		}
 	}
-	return TRUE;
+	return true;
 }
 
 
-BOOL convYJKMono(LPBYTE lpDst, LPVOID lpSurface, int nWidth, int nHeight)
+bool convYJKMono(unsigned char* lpDst, void* lpSurface, int nWidth, int nHeight)
 {
 	int		u, v;
-	LPBYTE	lpSrc;
+	unsigned char*	lpSrc;
 	int		nGap = nWidth - 128;
 	int		nBorder0, nBorder1;
 
@@ -65,35 +63,35 @@ BOOL convYJKMono(LPBYTE lpDst, LPVOID lpSurface, int nWidth, int nHeight)
 	nBorder1 = nBorder0 + nHeight;
 	if(nBorder1 > 106) nBorder1 = 106;
 
-	lpSrc = (LPBYTE)lpSurface + (nGap / 2) * 3;
+	lpSrc = (unsigned char*)lpSurface + (nGap / 2) * 3;
 	if(nBorder0 == 0) lpSrc += ((nHeight - 106) / 2) * 3;
 	lpSrc += ((nHeight-1) * nWidth * 3);
 	nGap *= 3;
 
 	for(v = 0; v < 106; v++){
 		if(v < nBorder0 || v >= nBorder1){
-			ZeroMemory(lpDst, 128);
+			memset(lpDst, 0, 128);
 			lpDst+=128;
 		} else {
 			for(u = 0; u < 128; u++){
-				*lpDst++ = (BYTE)(*lpSrc & 0xF8);
+				*lpDst++ = (unsigned char)(*lpSrc & 0xF8);
 				lpSrc+=3;
 			}
 			lpSrc += nGap;
 			lpSrc -= nWidth * 6;
 		}
 	}
-	return TRUE;
+	return true;
 }
 
 
-BOOL convYJKDither(LPBYTE lpDst, LPVOID lpSurface, int nWidth, int nHeight)
+bool convYJKDither(unsigned char* lpDst, void* lpSurface, int nWidth, int nHeight)
 {
 	int		u, v, i;
 	int		r[4],g[4],b[4],y[4];
 	int		i0,i1,i2,i3;
 	int		yy, j, k;
-	LPBYTE	lpSrc;
+	unsigned char*	lpSrc;
 	int		nGap = nWidth - 128;
 	int		nBorder0, nBorder1;
 
@@ -102,7 +100,7 @@ BOOL convYJKDither(LPBYTE lpDst, LPVOID lpSurface, int nWidth, int nHeight)
 	nBorder1 = nBorder0 + nHeight;
 	if(nBorder1 > 106) nBorder1 = 106;
 
-	lpSrc = (LPBYTE)lpSurface + (nGap / 2) * 3;
+	lpSrc = (unsigned char*)lpSurface + (nGap / 2) * 3;
 	if(nHeight > 106){
 		lpSrc += (((nHeight - 106) / 2) + 106-1)* 3 * nWidth;
 	} else {
@@ -112,7 +110,7 @@ BOOL convYJKDither(LPBYTE lpDst, LPVOID lpSurface, int nWidth, int nHeight)
 
 	for(v = 0; v < 106; v++){
 		if(v < nBorder0 || v >= nBorder1){
-			ZeroMemory(lpDst, 128);
+			memset(lpDst, 0, 128);
 			lpDst+=128;
 		} else {
 			for(u = 0; u < 128; u+=4){
@@ -152,26 +150,26 @@ BOOL convYJKDither(LPBYTE lpDst, LPVOID lpSurface, int nWidth, int nHeight)
 				k = k >> 3;
 
 				/* write */
-				*lpDst++ = (BYTE)(((y[0] & 31) << 3) | ( k       & 7));
-				*lpDst++ = (BYTE)(((y[1] & 31) << 3) | ((k >> 3) & 7));
-				*lpDst++ = (BYTE)(((y[2] & 31) << 3) | ( j       & 7));
-				*lpDst++ = (BYTE)(((y[3] & 31) << 3) | ((j >> 3) & 7));
+				*lpDst++ = (unsigned char)(((y[0] & 31) << 3) | ( k       & 7));
+				*lpDst++ = (unsigned char)(((y[1] & 31) << 3) | ((k >> 3) & 7));
+				*lpDst++ = (unsigned char)(((y[2] & 31) << 3) | ( j       & 7));
+				*lpDst++ = (unsigned char)(((y[3] & 31) << 3) | ((j >> 3) & 7));
 			}
 			lpSrc += nGap;
 			lpSrc -= nWidth * 6;
 		}
 	}
-	return TRUE;
+	return true;
 }
 
 
-BOOL convYJK(LPBYTE lpDst, LPVOID lpSurface, int nWidth, int nHeight)
+bool convYJK(unsigned char* lpDst, void* lpSurface, int nWidth, int nHeight)
 {
 	int		u, v, i;
 	int		r[4],g[4],b[4],y[4];
 	int		i0,i1,i2,i3;
 	int		yy, j, k;
-	LPBYTE	lpSrc;
+	unsigned char*	lpSrc;
 	int		nGap = nWidth - 128;
 	int		nBorder0, nBorder1;
 
@@ -180,7 +178,7 @@ BOOL convYJK(LPBYTE lpDst, LPVOID lpSurface, int nWidth, int nHeight)
 	nBorder1 = nBorder0 + nHeight;
 	if(nBorder1 > 106) nBorder1 = 106;
 
-	lpSrc = (LPBYTE)lpSurface + (nGap / 2) * 3;
+	lpSrc = (unsigned char*)lpSurface + (nGap / 2) * 3;
 	if(nHeight > 106){
 		lpSrc += (((nHeight - 106) / 2) + 106-1)* 3 * nWidth;
 	} else {
@@ -190,7 +188,7 @@ BOOL convYJK(LPBYTE lpDst, LPVOID lpSurface, int nWidth, int nHeight)
 
 	for(v = 0; v < 106; v++){
 		if(v < nBorder0 || v >= nBorder1){
-			ZeroMemory(lpDst, 128);
+			memset(lpDst, 0, 128);
 			lpDst+=128;
 		} else {
 			for(u = 0; u < 128; u+=4){
@@ -225,53 +223,51 @@ BOOL convYJK(LPBYTE lpDst, LPVOID lpSurface, int nWidth, int nHeight)
 				k = k >> 3;
 
 				/* write */
-				*lpDst++ = (BYTE)(((y[0] & 31) << 3) | ( k       & 7));
-				*lpDst++ = (BYTE)(((y[1] & 31) << 3) | ((k >> 3) & 7));
-				*lpDst++ = (BYTE)(((y[2] & 31) << 3) | ( j       & 7));
-				*lpDst++ = (BYTE)(((y[3] & 31) << 3) | ((j >> 3) & 7));
+				*lpDst++ = (unsigned char)(((y[0] & 31) << 3) | ( k       & 7));
+				*lpDst++ = (unsigned char)(((y[1] & 31) << 3) | ((k >> 3) & 7));
+				*lpDst++ = (unsigned char)(((y[2] & 31) << 3) | ( j       & 7));
+				*lpDst++ = (unsigned char)(((y[3] & 31) << 3) | ((j >> 3) & 7));
 			}
 			lpSrc += nGap;
 			lpSrc -= nWidth * 6;
 		}
 	}
-	return TRUE;
+	return true;
 }
 
 
-BOOL convPCM(LPBYTE lpDst, LPVOID lpSound, int nSize)
+bool convPCM(unsigned char* lpDst, void* lpSound, int nSize)
 {
-	CopyMemory(lpDst, lpSound, nSize);
-	return TRUE;
+	memcpy(lpDst, lpSound, nSize);
+	return true;
 }
 
 
 
 
 
-BOOL CloseEVA()
+bool CloseEVA()
 {
-	//if(hFileEva != INVALID_HANDLE_VALUE) CloseHandle(hFileEva);
-    if(hFileEva != INVALID_HANDLE_VALUE) close(hFileEva);
-	hFileEva = INVALID_HANDLE_VALUE;
-	return TRUE;
+    if(hFileEva != INVALID_HANDLE) close(hFileEva);
+	hFileEva = INVALID_HANDLE;
+	return true;
 }
 
 
-BOOL CreateEVA(LPCSTR lpszFilename, BOOL bEnh)
+bool CreateEVA(const char * lpszFilename, bool bEnh)
 {
 	CloseEVA();
-	//hFileEva = CreateFile(lpszFilename, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-    hFileEva = open(lpszFilename, O_CREAT|O_RDWR);
+	hFileEva = open(lpszFilename, O_CREAT|O_RDWR, 0666);
 	bEnhance = bEnh;
-	return hFileEva != INVALID_HANDLE_VALUE;
+	return hFileEva != INVALID_HANDLE;
 }
 
 
-BOOL AppendEVA()
+bool AppendEVA()
 {
-	DWORD	dwWritten;
+	unsigned long	dwWritten;
     printf("status: %d\n", hFileEva);
-	if(hFileEva == INVALID_HANDLE_VALUE) return FALSE;
+	if(hFileEva == INVALID_HANDLE) return false;
 	//if(!WriteFile(hFileEva, EvaBuff, 0x3C00, &dwWritten, NULL)) dwWritten = 0;
     dwWritten = write(hFileEva, EvaBuff, 0x3C00);
 
@@ -280,69 +276,69 @@ BOOL AppendEVA()
 }
 
 
-BOOL ConvEva(LPVOID lpSurface, int nWidth, int nHeight, LPVOID lpSound, int nSize, BOOL bDither, BOOL bMono)
+bool ConvEva(void* lpSurface, int nWidth, int nHeight, void* lpSound, int nSize, bool bDither, bool bMono)
 {
-	LPBYTE	lpBuff;
+	unsigned char*	lpBuff;
 
 	lpBuff = bEnhance ? EvaBuffTmp : EvaBuff;
 
 	/* Zero */
-	ZeroMemory(lpBuff, 0x3c00);
+	memset(lpBuff, 0, 0x3c00);
 
 	/* picture */
 	if(lpSurface){
 		if(bMono){
 			if(bDither){
-				if(!convYJKMonoDither(lpBuff + 0, lpSurface, nWidth, nHeight)) return FALSE;
+				if(!convYJKMonoDither(lpBuff + 0, lpSurface, nWidth, nHeight)) return false;
 			} else {
-				if(!convYJKMono(lpBuff + 0, lpSurface, nWidth, nHeight)) return FALSE;
+				if(!convYJKMono(lpBuff + 0, lpSurface, nWidth, nHeight)) return false;
 			}
 		} else {
 			if(bDither){
-				if(!convYJKDither(lpBuff + 0, lpSurface, nWidth, nHeight)) return FALSE;
+				if(!convYJKDither(lpBuff + 0, lpSurface, nWidth, nHeight)) return false;
 			} else {
-				if(!convYJK(lpBuff + 0, lpSurface, nWidth, nHeight)) return FALSE;
+				if(!convYJK(lpBuff + 0, lpSurface, nWidth, nHeight)) return false;
 			}
 		}
 	} else {
-		ZeroMemory(lpBuff, 0x3500);
+		memset(lpBuff, 0, 0x3500);
 	}
 
 	/* sound */
-	if(nSize >= 0x3BFE - 0x3500) return FALSE;
+	if(nSize >= 0x3BFE - 0x3500) return false;
 	if(lpSound){
-		if(!convPCM(lpBuff + 0x3500, lpSound, nSize)) return FALSE;
+		if(!convPCM(lpBuff + 0x3500, lpSound, nSize)) return false;
 	} else {
 		memset(lpBuff + 0x3500, 0x80, nSize);
 	}
 
 	/* size */
-	lpBuff[0x3BFE] = (BYTE)(nSize & 255);
-	lpBuff[0x3BFF] = (BYTE)((nSize >> 8) & 255);
+	lpBuff[0x3BFE] = (unsigned char)(nSize & 255);
+	lpBuff[0x3BFF] = (unsigned char)((nSize >> 8) & 255);
 
 	/* Enhance */
 	if(bEnhance){
-		LPBYTE	p = EvaBuff;
-		LPBYTE	pPcm = lpBuff + 0x3500;
-		LPBYTE	pVideo = lpBuff;
+		unsigned char*	p = EvaBuff;
+		unsigned char*	pPcm = lpBuff + 0x3500;
+		unsigned char*	pVideo = lpBuff;
 		for(int i = 0; i < 106; i++){
 			for(int j = 0; j < 11; j++){
 				*p++ = *pPcm++;
-				CopyMemory(p, pVideo, 11);
+				memcpy(p, pVideo, 11);
 				pVideo += 11;
 				p += 11;
 			}
 			*p++ = *pPcm++;
-			CopyMemory(p, pVideo, 7);
+			memcpy(p, pVideo, 7);
 			pVideo += 7;
 			p += 7;
 		}
 		if(nSize > 1272){
-			CopyMemory(p, pPcm, nSize - 1272);
+			memcpy(p, pPcm, nSize - 1272);
 		}
-		EvaBuff[0x3BFE] = (BYTE)(nSize & 255);
-		EvaBuff[0x3BFF] = (BYTE)((nSize >> 8) & 255);
+		EvaBuff[0x3BFE] = (unsigned char)(nSize & 255);
+		EvaBuff[0x3BFF] = (unsigned char)((nSize >> 8) & 255);
 	}
 
-	return TRUE;
+	return true;
 }

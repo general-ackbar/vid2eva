@@ -1,19 +1,21 @@
-#include "defs.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 //#include <alloc.h>
 //#include "avi.h"
 #include "eva.h"
 #include "mono.h"
+#include "video.h"
 
 
 #define	VERSION	8
 
 
-BOOL conv(LPSTR lpszInFile, LPSTR lpszOutFile, int nDstWidth, int nDstHeight, int nFps, int nStartFrame, int nOutFrames, BOOL bDither, BOOL bAdjust, BOOL bMono)
+bool conv(char* lpszInFile, char* lpszOutFile, int nDstWidth, int nDstHeight, int nFps, int nStartFrame, int nOutFrames, bool bDither, bool bAdjust, bool bMono)
 {
-	BOOL	bResult = FALSE;
-	LPVOID	lpTmp, lpAudioTmp;
+	bool	bResult = false;
+	void*	lpTmp;
+	void*	lpAudioTmp;
 	int		nFrame;
 	int		i;
 	int		nFrameCnt = 0;
@@ -23,14 +25,15 @@ BOOL conv(LPSTR lpszInFile, LPSTR lpszOutFile, int nDstWidth, int nDstHeight, in
 	int		nPcmSize;
 	int		nSrcWidth, nSrcHeight;
 
+	video *v = new video(lpszInFile);
 	//if(OpenAVI(lpszInFile)){
     if(true){
 		if(CreateEVA(lpszOutFile, nFps != 10)){
-            nFrame = 10; // AVIGetVideoFrame();
+            nFrame = v->getFrameCount(); // 10; // AVIGetVideoFrame();
             nRate = 5; //AVIGetVideoRate();
             nScale = 1; // AVIGetVideoScale();
-            nSrcWidth = 128; //AVIGetVideoWidth();
-            nSrcHeight = 64; //AVIGetVideoHeight();
+            nSrcWidth = v->getWidth(); //AVIGetVideoWidth();
+            nSrcHeight = v->getHeight(); //AVIGetVideoHeight();
 
 			if(nDstHeight == 0 && nDstWidth == 0){
 				nDstWidth = nSrcWidth;
@@ -52,6 +55,7 @@ BOOL conv(LPSTR lpszInFile, LPSTR lpszOutFile, int nDstWidth, int nDstHeight, in
 					nDstHeight = nDstWidth * 125 / 100;
 				}
 			}
+			v->prepareScaler(nDstWidth, nDstHeight);
 			//AVISetVideoSize(nDstWidth, nDstHeight);
 
 			i = nRate * 100 / nScale;
@@ -60,7 +64,7 @@ BOOL conv(LPSTR lpszInFile, LPSTR lpszOutFile, int nDstWidth, int nDstHeight, in
 
 			lpTmp = malloc(nDstWidth * nDstHeight * 3 + (15750 / nFps) + 1);
 			if(lpTmp){
-				lpAudioTmp = (LPVOID)((LPBYTE)lpTmp + nDstWidth * nDstHeight * 3);
+				lpAudioTmp = (void*)((unsigned char*)lpTmp + nDstWidth * nDstHeight * 3);
 				for(i = nStartFrame; i < nFrame;){
 					fprintf(stdout, "\x0d%d/%d(%d)",  i, nFrame-1, nMakes+1);
 
@@ -70,6 +74,8 @@ BOOL conv(LPSTR lpszInFile, LPSTR lpszOutFile, int nDstWidth, int nDstHeight, in
 					nPcmCnt %= nFps;
 
 					/* Read AVI Video */
+					int timestamp = i *  AV_TIME_BASE * (1/nFps);
+					lpTmp = v->getFrameAt(timestamp);
                     /*
 					if(!AVIReadVideo(lpTmp, i)){
 						fprintf(stdout, "\n");
@@ -88,7 +94,7 @@ BOOL conv(LPSTR lpszInFile, LPSTR lpszOutFile, int nDstWidth, int nDstHeight, in
                     */
 					/* Mono */
 					if(bMono){
-						if(!Mono((LPBYTE)lpTmp, nDstWidth, nDstHeight)){
+						if(!Mono((unsigned char*)lpTmp, nDstWidth, nDstHeight)){
 							fprintf(stdout, "\n");
 							fprintf(stderr, "mono error\n");
 							break;
@@ -120,7 +126,7 @@ BOOL conv(LPSTR lpszInFile, LPSTR lpszOutFile, int nDstWidth, int nDstHeight, in
 
 				if(i >= nFrame || nMakes >= nOutFrames){
 					fprintf(stdout, "\n");
-					bResult = TRUE;
+					bResult = true;
 				}
 
 				free(lpTmp);
@@ -156,17 +162,17 @@ int main(int argc, char *argv[])
 	int		i;
 	char	*pstrInFile = NULL;
 	char	*pstrOutFile = NULL;
-	int		nFps = 10;
+	int		nFps = 1;
 	int		nWidth = 0, nHeight = 0;
 	int		nStart = 0, nOuts = 0;
-	BOOL	bDither = FALSE;
-	BOOL	bAdjust = FALSE;
-	BOOL	bMono = FALSE;
+	bool	bDither = false;
+	bool	bAdjust = false;
+	bool	bMono = false;
 
 	fprintf(stdout, "AVI to EVA converter Version %d.%d, created by BUPPU.\n", VERSION>>8,VERSION&255);
 
 	for(i = 1; i < argc; i++){
-		if(*argv[i] == '/' || *argv[i] == '-'){
+		if(*argv[i] == '-'){
 			if(strcmp(argv[i]+1, "h") == 0){
 				putUsage();
 				return 0;
@@ -177,7 +183,7 @@ int main(int argc, char *argv[])
 				putUsage();
 				return 0;
 			} else if(strncmp(argv[i]+1,"dither", 6) == 0){
-				bDither = TRUE;
+				bDither = true;
 				continue;
 			} else if(strncmp(argv[i]+1,"fps", 3) == 0){
 				nFps = atoi(argv[i]+4);
@@ -195,14 +201,14 @@ int main(int argc, char *argv[])
 				nOuts = atoi(argv[i]+6);
 				continue;
 			} else if(strncmp(argv[i]+1, "adjust", 6) == 0){
-				bAdjust = TRUE;
+				bAdjust = true;
 				continue;
 			} else if(strncmp(argv[i]+1, "mono", 6) == 0){
-				bMono = TRUE;
+				bMono = true;
 				continue;
 			}
 		} else {
-			if(!pstrInFile){
+			if(!pstrInFile){				
 				pstrInFile = argv[i];
 				continue;
 			} else if(!pstrOutFile){

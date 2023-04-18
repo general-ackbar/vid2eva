@@ -2,84 +2,84 @@
   AVI to EVA converter ver0.8
 =========================================================================
 
-  œŠT—v
-      Windows ‚Ì“®‰æƒtƒ@ƒCƒ‹‚Å‚ ‚é .avi ƒtƒ@ƒCƒ‹‚ð MSX(+MEGASCSI) ‚ÅÄ¶
-    ‚Å‚«‚é“®‰æƒtƒ@ƒCƒ‹‚É•ÏŠ·‚·‚é Win32 console ƒvƒƒOƒ‰ƒ€‚Å‚·B
+  ï¿½ï¿½ï¿½Tï¿½v
+      Windows ï¿½Ì“ï¿½ï¿½ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½Å‚ï¿½ï¿½ï¿½ .avi ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½ MSX(+MEGASCSI) ï¿½ÅÄï¿½
+    ï¿½Å‚ï¿½ï¿½é“®ï¿½ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½É•ÏŠï¿½ï¿½ï¿½ï¿½ï¿½ Win32 console ï¿½vï¿½ï¿½ï¿½Oï¿½ï¿½ï¿½ï¿½ï¿½Å‚ï¿½ï¿½B
 
 
-  œŽg‚¢•û
+  ï¿½ï¿½ï¿½gï¿½ï¿½ï¿½ï¿½
 
-      DOS ƒvƒƒ“ƒvƒgã‚ÅˆÈ‰º‚Ì‚æ‚¤‚É“ü—Í‚µ‚Ä‚­‚¾‚³‚¢B
+      DOS ï¿½vï¿½ï¿½ï¿½ï¿½ï¿½vï¿½gï¿½ï¿½ÅˆÈ‰ï¿½ï¿½Ì‚æ‚¤ï¿½É“ï¿½ï¿½Í‚ï¿½ï¿½Ä‚ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½B
 
-	AVI2EVA [•ÏŠ·Œ³ƒtƒ@ƒCƒ‹–¼] [o—Íƒtƒ@ƒCƒ‹–¼] -HSIZE128 -ADJUST -DITHER
+	AVI2EVA [ï¿½ÏŠï¿½ï¿½ï¿½ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½] [ï¿½oï¿½Íƒtï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½] -HSIZE128 -ADJUST -DITHER
 
-      12FPS ‚Ö•ÏŠ·‚µ‚½‚¢ê‡‚ÍA-FPS12 ‚ð’Ç‰Á‚µ‚Ä‚­‚¾‚³‚¢B
-
-
-  œƒIƒvƒVƒ‡ƒ“
-
-      -HSIZEn   •ÏŠ·ƒoƒbƒtƒ@‚Ì‰¡ƒTƒCƒY‚ðŽw’è‚µ‚Ü‚·B
-      -VSIZEn   •ÏŠ·ƒoƒbƒtƒ@‚ÌcƒTƒCƒY‚ðŽw’è‚µ‚Ü‚·B
-      -STARTn   •ÏŠ·‚ðŠJŽn‚·‚é AVI ƒtƒ@ƒCƒ‹‚ÌƒtƒŒ[ƒ€”Ô†‚ðŽw’è‚µ‚Ü‚·B
-      -FPSn     EVA ƒtƒ@ƒCƒ‹‚ÌƒtƒŒ[ƒ€ƒŒ[ƒg‚ðŽw’è‚µ‚Ü‚·B
-                ƒfƒtƒHƒ‹ƒg‚Í 10[FPS] ‚Å‚·B
-      -FRAME    EVA ƒtƒ@ƒCƒ‹‚Ìo—ÍƒtƒŒ[ƒ€”‚ðŽw’è‚µ‚Ü‚·B
-      -DITHER   ƒfƒBƒUˆ—‚ðs‚¤B
-      -ADJUST   ƒAƒXƒyƒNƒg”ä’²®‚ðs‚¤B
-      -MONO     ”’•o—Í‚ðs‚¤B
-
-      AVI ƒtƒ@ƒCƒ‹‚©‚ç“Ç‚ÝŽæ‚ç‚ê‚½‰æ‘œ‚ÍA•ÏŠ·ƒoƒbƒtƒ@‚Ök¬(Šg‘å)‚³‚ê‚Ä
-    ‚©‚ç EVA ƒtƒ@ƒCƒ‹‚É‘‚«‚±‚Ü‚ê‚Ü‚·B-HSIZE ‚â -VSIZE ‚ÅŽw’è‚³‚ê‚½ƒoƒb
-    ƒtƒ@‚Ì‘å‚«‚³‚ª 128x106dot ˆÈŠO‚È‚çA•ÏŠ·ƒoƒbƒtƒ@’†‰›‚Ì 128x106dot ‚ª
-    EVA ƒtƒ@ƒCƒ‹‚Öo—Í‚³‚ê‚Ü‚·B-HSIZE,-VSIZE ‚Ì—¼•û‚ðŽw’è‚µ‚Ä‚¢‚È‚¢ê‡
-    ‚ÍAAVI ƒtƒ@ƒCƒ‹‚Ì‰æ‘œ‚Æ“¯‚¶‘å‚«‚³‚Ìƒoƒbƒtƒ@‚ðŠm•Û‚µ‚Ü‚·B -HSIZE ‚Ü
-    ‚½‚Í -VSIZE ‚Ì‚Ç‚¿‚ç‚©ˆê•û‚¾‚¯‚ðŽw’è‚µ‚½ê‡AŽw’è‚³‚ê‚Ä‚¢‚È‚¢•û‚Ì‘å
-    ‚«‚³‚Í AVI ‚Ì‰æ‘œƒTƒCƒY‚©‚ç“KØ‚ÈƒTƒCƒY‚ðŒvŽZ‚µ‚½’l‚Æ‚È‚è‚Ü‚·B
+      12FPS ï¿½Ö•ÏŠï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ê‡ï¿½ÍA-FPS12 ï¿½ï¿½Ç‰ï¿½ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½B
 
 
-  œŠù’m‚ÌƒoƒO
+  ï¿½ï¿½ï¿½Iï¿½vï¿½Vï¿½ï¿½ï¿½ï¿½
 
-    EHSIZE ‚ª 128 –¢–ž‚Å‚Ì•ÏŠ·ƒ~ƒXB
-    EMono ƒ‚[ƒh‚Å‰¡‚ª‚¸‚ê‚éB
-    EMono ƒ‚[ƒh‚Å–¾‚é‚³‚ª–O˜a‚µ‚È‚¢B
+      -HSIZEn   ï¿½ÏŠï¿½ï¿½oï¿½bï¿½tï¿½@ï¿½Ì‰ï¿½ï¿½Tï¿½Cï¿½Yï¿½ï¿½ï¿½wï¿½è‚µï¿½Ü‚ï¿½ï¿½B
+      -VSIZEn   ï¿½ÏŠï¿½ï¿½oï¿½bï¿½tï¿½@ï¿½Ìcï¿½Tï¿½Cï¿½Yï¿½ï¿½ï¿½wï¿½è‚µï¿½Ü‚ï¿½ï¿½B
+      -STARTn   ï¿½ÏŠï¿½ï¿½ï¿½ï¿½Jï¿½nï¿½ï¿½ï¿½ï¿½ AVI ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½Ìƒtï¿½ï¿½ï¿½[ï¿½ï¿½ï¿½Ôï¿½ï¿½ï¿½ï¿½wï¿½è‚µï¿½Ü‚ï¿½ï¿½B
+      -FPSn     EVA ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½Ìƒtï¿½ï¿½ï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½[ï¿½gï¿½ï¿½ï¿½wï¿½è‚µï¿½Ü‚ï¿½ï¿½B
+                ï¿½fï¿½tï¿½Hï¿½ï¿½ï¿½gï¿½ï¿½ 10[FPS] ï¿½Å‚ï¿½ï¿½B
+      -FRAME    EVA ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½Ìoï¿½Íƒtï¿½ï¿½ï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½wï¿½è‚µï¿½Ü‚ï¿½ï¿½B
+      -DITHER   ï¿½fï¿½Bï¿½Uï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½sï¿½ï¿½ï¿½B
+      -ADJUST   ï¿½Aï¿½Xï¿½yï¿½Nï¿½gï¿½ä’²ï¿½ï¿½ï¿½ï¿½ï¿½sï¿½ï¿½ï¿½B
+      -MONO     ï¿½ï¿½ï¿½ï¿½ï¿½oï¿½Í‚ï¿½ï¿½sï¿½ï¿½ï¿½B
+
+      AVI ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç‚ÝŽï¿½ï¿½ê‚½ï¿½æ‘œï¿½ÍAï¿½ÏŠï¿½ï¿½oï¿½bï¿½tï¿½@ï¿½Ökï¿½ï¿½(ï¿½gï¿½ï¿½)ï¿½ï¿½ï¿½ï¿½ï¿½
+    ï¿½ï¿½ï¿½ï¿½ EVA ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½Éï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü‚ï¿½Ü‚ï¿½ï¿½B-HSIZE ï¿½ï¿½ -VSIZE ï¿½ÅŽwï¿½è‚³ï¿½ê‚½ï¿½oï¿½b
+    ï¿½tï¿½@ï¿½Ì‘å‚«ï¿½ï¿½ï¿½ï¿½ 128x106dot ï¿½ÈŠOï¿½È‚ï¿½Aï¿½ÏŠï¿½ï¿½oï¿½bï¿½tï¿½@ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 128x106dot ï¿½ï¿½
+    EVA ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½Öoï¿½Í‚ï¿½ï¿½ï¿½Ü‚ï¿½ï¿½B-HSIZE,-VSIZE ï¿½Ì—ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½wï¿½è‚µï¿½Ä‚ï¿½ï¿½È‚ï¿½ï¿½ê‡
+    ï¿½ÍAAVI ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½Ì‰æ‘œï¿½Æ“ï¿½ï¿½ï¿½ï¿½å‚«ï¿½ï¿½ï¿½Ìƒoï¿½bï¿½tï¿½@ï¿½ï¿½ï¿½mï¿½Û‚ï¿½ï¿½Ü‚ï¿½ï¿½B -HSIZE ï¿½ï¿½
+    ï¿½ï¿½ï¿½ï¿½ -VSIZE ï¿½Ì‚Ç‚ï¿½ï¿½ç‚©ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½wï¿½è‚µï¿½ï¿½ï¿½ê‡ï¿½Aï¿½wï¿½è‚³ï¿½ï¿½Ä‚ï¿½ï¿½È‚ï¿½ï¿½ï¿½ï¿½Ì‘ï¿½
+    ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ AVI ï¿½Ì‰æ‘œï¿½Tï¿½Cï¿½Yï¿½ï¿½ï¿½ï¿½Kï¿½Ø‚ÈƒTï¿½Cï¿½Yï¿½ï¿½ï¿½vï¿½Zï¿½ï¿½ï¿½ï¿½ï¿½lï¿½Æ‚È‚ï¿½Ü‚ï¿½ï¿½B
 
 
-  œ—š—ð
+  ï¿½ï¿½ï¿½ï¿½ï¿½mï¿½Ìƒoï¿½O
+
+    ï¿½EHSIZE ï¿½ï¿½ 128 ï¿½ï¿½ï¿½ï¿½ï¿½Å‚Ì•ÏŠï¿½ï¿½~ï¿½Xï¿½B
+    ï¿½EMono ï¿½ï¿½ï¿½[ï¿½hï¿½Å‰ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½B
+    ï¿½EMono ï¿½ï¿½ï¿½[ï¿½hï¿½Å–ï¿½ï¿½é‚³ï¿½ï¿½ï¿½Oï¿½aï¿½ï¿½ï¿½È‚ï¿½ï¿½B
+
+
+  ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
     ver0.0
-      E‰”Å
+      ï¿½Eï¿½ï¿½ï¿½ï¿½
 
     ver0.1
-      EPCM •ÏŠ·‚É‘Î‰ž
+      ï¿½EPCM ï¿½ÏŠï¿½ï¿½É‘Î‰ï¿½
 
     ver0.2
-      EYJK •ÏŠ·ƒ‹[ƒ`ƒ“‚ÌƒoƒOC³
-      EYJK •ÏŠ·ƒ‹[ƒ`ƒ“‚Ì‰æŽ¿‰ü‘P
-      EƒfƒBƒUƒ‹[ƒ`ƒ“’Ç‰Á
+      ï¿½EYJK ï¿½ÏŠï¿½ï¿½ï¿½ï¿½[ï¿½`ï¿½ï¿½ï¿½Ìƒoï¿½Oï¿½Cï¿½ï¿½
+      ï¿½EYJK ï¿½ÏŠï¿½ï¿½ï¿½ï¿½[ï¿½`ï¿½ï¿½ï¿½Ì‰æŽ¿ï¿½ï¿½ï¿½P
+      ï¿½Eï¿½fï¿½Bï¿½Uï¿½ï¿½ï¿½[ï¿½`ï¿½ï¿½ï¿½Ç‰ï¿½
 
     ver0.3
-      EƒXƒyƒ‹ƒ~ƒXC³
-      EYJK •ÏŠ·ƒ‹[ƒ`ƒ“‚Ì‰æŽ¿‰ü‘P
-      EƒAƒXƒyƒNƒg”ä’²®‚Ì’Ç‰Á
-      E”’•o—Í’Ç‰Á
+      ï¿½Eï¿½Xï¿½yï¿½ï¿½ï¿½~ï¿½Xï¿½Cï¿½ï¿½
+      ï¿½EYJK ï¿½ÏŠï¿½ï¿½ï¿½ï¿½[ï¿½`ï¿½ï¿½ï¿½Ì‰æŽ¿ï¿½ï¿½ï¿½P
+      ï¿½Eï¿½Aï¿½Xï¿½yï¿½Nï¿½gï¿½ä’²ï¿½ï¿½ï¿½Ì’Ç‰ï¿½
+      ï¿½Eï¿½ï¿½ï¿½ï¿½ï¿½oï¿½Í’Ç‰ï¿½
 
     ver0.4
-      EYJK •ÏŠ·ƒ‹[ƒ`ƒ“‚Ì‰æŽ¿‰ü‘P
+      ï¿½EYJK ï¿½ÏŠï¿½ï¿½ï¿½ï¿½[ï¿½`ï¿½ï¿½ï¿½Ì‰æŽ¿ï¿½ï¿½ï¿½P
 
     ver0.5
-      ELkƒ‹[ƒ`ƒ“‚Ì‚‘¬‰»
-      EPCM ‚Öƒvƒ`ƒmƒCƒY‚ª“ü‚éƒoƒO‚ðC³
+      ï¿½Eï¿½Lï¿½kï¿½ï¿½ï¿½[ï¿½`ï¿½ï¿½ï¿½Ìï¿½ï¿½ï¿½ï¿½ï¿½
+      ï¿½EPCM ï¿½Öƒvï¿½`ï¿½mï¿½Cï¿½Yï¿½ï¿½ï¿½ï¿½ï¿½ï¿½oï¿½Oï¿½ï¿½ï¿½Cï¿½ï¿½
 
     ver0.6
-      E12FPS ‚É‘Î‰ž
+      ï¿½E12FPS ï¿½É‘Î‰ï¿½
 
     ver0.7
-      EƒfƒBƒUƒpƒ^[ƒ“•ÏX
+      ï¿½Eï¿½fï¿½Bï¿½Uï¿½pï¿½^ï¿½[ï¿½ï¿½ï¿½ÏX
 
     ver0.8
-      E‰¹º‚Ì•ÏŠ·‚ÉŽ¸”s‚·‚éƒoƒO‚ðC³
+      ï¿½Eï¿½ï¿½ï¿½ï¿½ï¿½Ì•ÏŠï¿½ï¿½ÉŽï¿½ï¿½sï¿½ï¿½ï¿½ï¿½oï¿½Oï¿½ï¿½ï¿½Cï¿½ï¿½
 
 
-  œ˜A—æ
+  ï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½ï¿½
 
 	e-mail :  buppu@mc.neweb.ne.jp

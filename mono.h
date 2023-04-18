@@ -1,4 +1,4 @@
-#include "defs.h"
 
 
-BOOL Mono(LPBYTE pDst, int nWidth, int nHeight);
+
+bool Mono(unsigned char* pDst, int nWidth, int nHeight);
