@@ -1,4 +1,6 @@
-#include "stretch.h"
+#include <windows.h>
+
+
 int		nDstHPer, nDstVPer;
 int		nSrcHPer, nSrcVPer;
 int		nDstWidth, nDstHeight;
@@ -51,7 +53,7 @@ void SetStretchPer(int nDstWidth, int nDstHeight, int nSrcWidth, int nSrcHeight)
 }
 
 
-void StretchHorz(unsigned char* pDst, unsigned char* pSrc)
+void StretchHorz(LPBYTE pDst, LPBYTE pSrc)
 {
 	int		i, j;
 	int		sumR, sumG, sumB;
@@ -86,20 +88,20 @@ void StretchHorz(unsigned char* pDst, unsigned char* pSrc)
 				sumB += pSrc[2] * cnt;
 			}
 
-			*pDst++ = (unsigned char)(sumR / nSrcHPer);
-			*pDst++ = (unsigned char)(sumG / nSrcHPer);
-			*pDst++ = (unsigned char)(sumB / nSrcHPer);
+			*pDst++ = (BYTE)(sumR / nSrcHPer);
+			*pDst++ = (BYTE)(sumG / nSrcHPer);
+			*pDst++ = (BYTE)(sumB / nSrcHPer);
 		}
 	}
 }
 
 
-void StretchVert(unsigned char* pDst, unsigned char* pSrc)
+void StretchVert(LPBYTE pDst, LPBYTE pSrc)
 {
 	int		i, j;
 	int		sumR, sumG, sumB;
 	int		cnt;
-	unsigned char*	p;
+	LPBYTE	p;
 	int		nSrcPitch = nDstWidth*3;
 	int		nDstPitch = nDstWidth*3;
 	int		n = nDstWidth;
@@ -133,9 +135,9 @@ void StretchVert(unsigned char* pDst, unsigned char* pSrc)
 				sumB += p[2] * cnt;
 			}
 
-			*(pDst + i * nDstPitch + 0) = (unsigned char)(sumR / nSrcVPer);
-			*(pDst + i * nDstPitch + 1) = (unsigned char)(sumG / nSrcVPer);
-			*(pDst + i * nDstPitch + 2) = (unsigned char)(sumB / nSrcVPer);
+			*(pDst + i * nDstPitch + 0) = (BYTE)(sumR / nSrcVPer);
+			*(pDst + i * nDstPitch + 1) = (BYTE)(sumG / nSrcVPer);
+			*(pDst + i * nDstPitch + 2) = (BYTE)(sumB / nSrcVPer);
 		}
 		pDst += 3;
 		pSrc += 3;
@@ -143,16 +145,16 @@ void StretchVert(unsigned char* pDst, unsigned char* pSrc)
 }
 
 
-bool Stretch(unsigned char* pDst, unsigned char* pSrc)
+BOOL Stretch(LPBYTE pDst, LPBYTE pSrc)
 {
-	void*	pTmp;
+	LPVOID	pTmp;
 
 	pTmp = malloc(nDstWidth * nSrcHeight * 3);
-	if(pTmp == NULL) return false;
+	if(pTmp == NULL) return FALSE;
 
-	StretchHorz((unsigned char*)pTmp, (unsigned char*)pSrc);
-	StretchVert((unsigned char*)pDst, (unsigned char*)pTmp);
+	StretchHorz((LPBYTE)pTmp, (LPBYTE)pSrc);
+	StretchVert((LPBYTE)pDst, (LPBYTE)pTmp);
 
 	free(pTmp);
-	return true;
+	return TRUE;
 }

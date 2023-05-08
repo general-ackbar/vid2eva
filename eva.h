@@ -1,9 +1,52 @@
-#include <string.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <fcntl.h>
+#ifndef EVA_H
+#define EVA_H
 
-bool CloseEVA();
-bool CreateEVA(const char * lpszFilename, bool bEnh);
-bool AppendEVA();
-bool ConvEva(void* lpSurface, int nWidth, int nHeight, void* lpSound, int nSize, bool bDither, bool bMono);
+#include <vector>
+#include <fcntl.h>
+#include <unistd.h>
+#include "imageops.h"
+
+
+#define XSIZE 96
+#define YSIZE 92
+#define FRAMESIZE XSIZE/4 * YSIZE
+
+class Eva
+{
+
+public:
+    Eva(const char* infile);
+    Eva(int fps);
+    Eva();
+    ~Eva();
+
+    uint8_t *getFrameAt(int index);
+    uint8_t *encodeFrame(uint8_t *pSrc, int width, int height);
+    void dumpInfo();
+    void appendFrame(uint8_t* pFrame);
+    void exportEva3(const char* file);
+    void exportEva4(const char* file);
+
+    
+    double getLength();
+    void setFrameRate(int fps);
+    int getFramerate();
+    long getFrameCount();
+    int getWidth();
+    int getHeight();
+    std::vector<uint8_t*> getFrames();
+
+
+private:
+    int framerate;
+    int total_frames;
+    double length;
+    int width;
+    int height;
+
+    std::vector<uint8_t*> frames;
+};
+
+#endif
+
+

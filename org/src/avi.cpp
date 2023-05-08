@@ -1,110 +1,110 @@
-//#include <windows.h>
-//#include <mmsystem.h>
+#include <windows.h>
+#include <mmsystem.h>
 #include "stretch.h"
-//#include <vfw.h>
-//#include <alloc.h>
+#include <vfw.h>
+#include <alloc.h>
 #include <stdio.h>
 
-bool				bAVIInit;
+BOOL				bAVIInit;
 PAVIFILE			pAviFile;
 PAVISTREAM			pAviStreamVideo;
 PAVISTREAM			pAviStreamAudio;
 BITMAPINFOHEADER	biBitmap;
-long				lStreamPosVideo;
-long				lStreamPosAudio;
+LONG				lStreamPosVideo;
+LONG				lStreamPosAudio;
 PGETFRAME			pGetFrame;
 AVIFILEINFO			AviFileInfo;
 LPWAVEFORMATEX		lpwfxWave;
 HACMSTREAM			hasFormat;
 HACMSTREAM			hasRate;
-unsigned long				dwWaveDstSize;
+DWORD				dwWaveDstSize;
 int					nWaveDstOfs;
-void*				lpWaveDst;
+LPVOID				lpWaveDst;
 int					nDstWidth, nDstHeight;
 
 
-bool setDummyAudio()
+BOOL setDummyAudio()
 {
 	dwWaveDstSize = 16384;
 	lpWaveDst = malloc(dwWaveDstSize);
 	if(lpWaveDst == NULL){
 		fprintf(stderr, "can not allocate memory\n");
-		return false;
+		return FALSE;
 	}
 	memset(lpWaveDst, 0x80, dwWaveDstSize);
-	return true;
+	return TRUE;
 }
 
 
-bool readconvAudio()
+BOOL readconvAudio()
 {
-	void*				lpTmp, lpTmp2;
+	LPVOID				lpTmp, lpTmp2;
 	long				leng, sample;
 	ACMSTREAMHEADER		ash;
 	HRESULT				hr;
-	unsigned long				dwSize;
+	DWORD				dwSize;
 
-	/* ï¿½Æ‚è‚ ï¿½ï¿½ï¿½ï¿½ï¿½Jï¿½ï¿½ */
+	/* ‚Æ‚è‚ ‚¦‚¸ŠJ•ú */
 	if(lpWaveDst){
 		free(lpWaveDst);
 		lpWaveDst = NULL;
 		dwWaveDstSize = 0;
 	}
 
-	/* ï¿½_ï¿½~ï¿½[ï¿½ï¿½Ô‚ï¿½ */
+	/* ƒ_ƒ~[‚ð•Ô‚· */
 	if(pAviStreamAudio == NULL){
 		return setDummyAudio();
 	} else if(lStreamPosAudio >= AVIStreamEnd(pAviStreamAudio)){
 		return setDummyAudio();
 	}
 
-	/* ï¿½Tï¿½Cï¿½Yï¿½ï¿½ï¿½ï¿½ */
+	/* ƒTƒCƒY“¾‚é */
 	hr = AVIStreamRead(pAviStreamAudio, lStreamPosAudio, AVISTREAMREAD_CONVENIENT, NULL, 0, &leng, &sample);
 	if(hr){
 		lStreamPosAudio = AVIStreamEnd(pAviStreamAudio);
 		return setDummyAudio();
 	}
 
-	/* ï¿½oï¿½bï¿½tï¿½@ï¿½mï¿½ï¿½ */
+	/* ƒoƒbƒtƒ@Šm•Û */
 	lpTmp = malloc(leng);
 	if(lpTmp == NULL){
 		fprintf(stderr, "can not allocate memory\n");
-		return false;
+		return FALSE;
 	}
 
-	/* ï¿½Xï¿½gï¿½ï¿½ï¿½[ï¿½ï¿½ï¿½Ç‚Ýï¿½ï¿½ï¿½ */
+	/* ƒXƒgƒŠ[ƒ€“Ç‚Ýž‚Ý */
 	hr = AVIStreamRead(pAviStreamAudio, lStreamPosAudio, sample, lpTmp, leng, NULL, NULL);
 	if(hr){
 		free(lpTmp);
 		fprintf(stderr, "can not read audio stream\n");
-		return false;
+		return FALSE;
 	}
 
 	if(hasFormat){
-		/* ï¿½ÏŠï¿½ï¿½ï¿½ÌƒTï¿½Cï¿½Yï¿½ð“¾‚ï¿½ */
+		/* •ÏŠ·Œã‚ÌƒTƒCƒY‚ð“¾‚é */
 		hr = acmStreamSize(hasFormat, leng, &dwSize, ACM_STREAMSIZEF_SOURCE);
 		if(hr){
 			free(lpTmp);
 			fprintf(stderr, "can not get convert stream size\n");
-			return false;
+			return FALSE;
 		}
-		/* ï¿½ÏŠï¿½ï¿½ï¿½ÌŠiï¿½[ï¿½oï¿½bï¿½tï¿½@ï¿½ï¿½ï¿½mï¿½ï¿½ */
+		/* •ÏŠ·Œã‚ÌŠi”[ƒoƒbƒtƒ@‚ðŠm•Û */
 		lpTmp2 = malloc(dwSize);
 		if(lpTmp2==NULL){
 			free(lpTmp);
 			fprintf(stderr, "can not allocate memory\n");
-			return false;
+			return FALSE;
 		}
-		/* ï¿½oï¿½bï¿½tï¿½@ï¿½Ìï¿½ï¿½ï¿½ */
+		/* ƒoƒbƒtƒ@‚Ì€”õ */
 		ZeroMemory(&ash, sizeof(ash));
 		ash.cbStruct		= sizeof(ash);
 		ash.fdwStatus		= 0;
 		ash.dwUser			= 0;
-		ash.pbSrc			= (unsigned char*)lpTmp;
+		ash.pbSrc			= (LPBYTE)lpTmp;
 		ash.cbSrcLength		= leng;
 		ash.cbSrcLengthUsed	= 0;
 		ash.dwSrcUser		= 0;
-		ash.pbDst			= (unsigned char*)lpTmp2;
+		ash.pbDst			= (LPBYTE)lpTmp2;
 		ash.cbDstLength		= dwSize;
 		ash.cbDstLengthUsed	= 0;
 		ash.dwDstUser		= 0;
@@ -113,51 +113,51 @@ bool readconvAudio()
 			free(lpTmp2);
 			free(lpTmp);
 			fprintf(stderr, "prepare header error\n");
-			return false;
+			return FALSE;
 		}
-		/* ï¿½ÏŠï¿½ */
+		/* •ÏŠ· */
 		hr = acmStreamConvert(hasFormat, &ash, 0);
 		if(hr){
 			acmStreamUnprepareHeader(hasFormat, &ash, 0);
 			free(lpTmp2);
 			free(lpTmp);
 			fprintf(stderr, "convert error\n");
-			return false;
+			return FALSE;
 		}
-		/* ï¿½oï¿½bï¿½tï¿½@ï¿½ÌŒï¿½nï¿½ï¿½ */
+		/* ƒoƒbƒtƒ@‚ÌŒãŽn–– */
 		acmStreamUnprepareHeader(hasFormat, &ash, 0);
-		/* ï¿½ï¿½ï¿½ï¿½Ö‚ï¿½ */
+		/* “ü‚ê‘Ö‚¦ */
 		free(lpTmp);
 		lpTmp = lpTmp2;
 		leng = ash.cbDstLengthUsed;
 	}
 
-	/* ï¿½ÏŠï¿½ï¿½ï¿½ÌƒTï¿½Cï¿½Yï¿½ð“¾‚ï¿½ */
+	/* •ÏŠ·Œã‚ÌƒTƒCƒY‚ð“¾‚é */
 	hr = acmStreamSize(hasRate, leng, &dwSize, ACM_STREAMSIZEF_SOURCE);
 	if(hr){
 		free(lpTmp);
 		fprintf(stderr, "can not get convert stream size\n");
-		return false;
+		return FALSE;
 	}
 
-	/* ï¿½oï¿½bï¿½tï¿½@ï¿½mï¿½ï¿½ */
+	/* ƒoƒbƒtƒ@Šm•Û */
 	lpWaveDst = malloc(dwSize);
 	if(lpWaveDst==NULL){
 		free(lpTmp);
 		fprintf(stderr, "can not allocate memory\n");
-		return false;
+		return FALSE;
 	}
 
-	/* ï¿½oï¿½bï¿½tï¿½@ï¿½ï¿½ï¿½ï¿½ */
+	/* ƒoƒbƒtƒ@€”õ */
 	ZeroMemory(&ash, sizeof(ash));
 	ash.cbStruct		= sizeof(ash);
 	ash.fdwStatus		= 0;
 	ash.dwUser			= 0;
-	ash.pbSrc			= (unsigned char*)lpTmp;
+	ash.pbSrc			= (LPBYTE)lpTmp;
 	ash.cbSrcLength		= leng;
 	ash.cbSrcLengthUsed	= 0;
 	ash.dwSrcUser		= 0;
-	ash.pbDst			= (unsigned char*)lpWaveDst;
+	ash.pbDst			= (LPBYTE)lpWaveDst;
 	ash.cbDstLength		= dwSize;
 	ash.cbDstLengthUsed	= 0;
 	ash.dwDstUser		= 0;
@@ -167,10 +167,10 @@ bool readconvAudio()
 		lpWaveDst = NULL;
 		free(lpTmp);
 		fprintf(stderr, "prepare header error\n");
-		return false;
+		return FALSE;
 	}
 
-	/* ï¿½ÏŠï¿½ */
+	/* •ÏŠ· */
 	hr = acmStreamConvert(hasRate, &ash, 0);
 	if(hr){
 		acmStreamUnprepareHeader(hasRate, &ash, 0);
@@ -178,23 +178,23 @@ bool readconvAudio()
 		lpWaveDst = NULL;
 		free(lpTmp);
 		fprintf(stderr, "convert error\n");
-		return false;
+		return FALSE;
 	}
 
-	/* ï¿½ï¿½nï¿½ï¿½ */
+	/* ŒãŽn–– */
 	acmStreamUnprepareHeader(hasRate, &ash, 0);
 
 	free(lpTmp);
 
 	dwWaveDstSize = ash.cbDstLengthUsed;
 	lStreamPosAudio += sample;
-	return true;
+	return TRUE;
 }
 
 
 
 
-bool CloseAVI()
+BOOL CloseAVI()
 {
 	if(lpWaveDst){
 		free(lpWaveDst);
@@ -230,56 +230,56 @@ bool CloseAVI()
 	}
 	if(bAVIInit){
 		AVIFileExit();
-		bAVIInit = false;
+		bAVIInit = FALSE;
 	}
-	return true;
+	return TRUE;
 }
 
 
-bool OpenAVI(char* lpszFile)
+BOOL OpenAVI(LPSTR lpszFile)
 {
 	HRESULT			hr; 
-	long			lStreamSize; 
+	LONG			lStreamSize; 
 	WAVEFORMATEX	wfxDst;
 	WAVEFORMATEX	wfxDst2;
 
 	CloseAVI();
 
-	/* AVI File ï¿½ï¿½ï¿½Jï¿½ï¿½ */
+	/* AVI File ‚ðŠJ‚­ */
 	AVIFileInit();
-	bAVIInit = true;
+	bAVIInit = TRUE;
 	hr = AVIFileOpen(&pAviFile, lpszFile, 0, 0L);
 	if(hr != 0){
 fprintf(stderr, "can not open %s\n", lpszFile);
 		CloseAVI();
-		return false;
+		return FALSE;
 	}
 
-	/* AVI file ï¿½ï¿½ï¿½ï¿½ï¿½ */
+	/* AVI file ‚¨î•ñ */
 	if(AVIFileInfo(pAviFile, &AviFileInfo, sizeof(AviFileInfo))){
 fprintf(stderr, "can not get AVI info\n");
 		CloseAVI();
-		return false;
+		return FALSE;
 	}
 
-	/* VIDEO ï¿½Xï¿½gï¿½ï¿½ï¿½[ï¿½ï¿½ï¿½nï¿½ï¿½ï¿½hï¿½ï¿½ï¿½ð“¾‚ï¿½ */
+	/* VIDEO ƒXƒgƒŠ[ƒ€ƒnƒ“ƒhƒ‹‚ð“¾‚é */
 	hr = AVIFileGetStream(pAviFile, &pAviStreamVideo, streamtypeVIDEO, 0);
 	if(hr != 0){
 fprintf(stderr, "can not get video stream\n");
 		CloseAVI();
-		return false;
+		return FALSE;
 	}
 
-	/* bitmap format ï¿½ð“¾‚ï¿½ */
+	/* bitmap format ‚ð“¾‚é */
 	lStreamSize = sizeof(biBitmap);
 	hr = AVIStreamReadFormat(pAviStreamVideo, 0, &biBitmap, &lStreamSize);
 	if(hr != 0){
 fprintf(stderr, "can not get video format\n");
 		CloseAVI();
-		return false;
+		return FALSE;
 	}
 
-	/* Decode ï¿½Ï‚Ý‚Ìƒrï¿½bï¿½gï¿½}ï¿½bï¿½vï¿½ð“¾‚é€ï¿½ï¿½ */
+	/* Decode Ï‚Ý‚Ìƒrƒbƒgƒ}ƒbƒv‚ð“¾‚é€”õ */
 	biBitmap.biSize = sizeof(biBitmap);
 	//biBitmap.biWidth = 128;
 	//biBitmap.biHeight = 106;
@@ -295,36 +295,36 @@ fprintf(stderr, "can not get video format\n");
 	if(pGetFrame == NULL){
 fprintf(stderr, "can not open get frame\n");
 		CloseAVI();
-		return false;
+		return FALSE;
 	}
 
-	/* AUDIO ï¿½Xï¿½gï¿½ï¿½ï¿½[ï¿½ï¿½ï¿½nï¿½ï¿½ï¿½hï¿½ï¿½ï¿½ð“¾‚ï¿½ */
+	/* AUDIO ƒXƒgƒŠ[ƒ€ƒnƒ“ƒhƒ‹‚ð“¾‚é */
 	hr = AVIFileGetStream(pAviFile, &pAviStreamAudio, streamtypeAUDIO, 0);
 	if(hr == 0){
 
-		/* Wave format ï¿½ÌƒTï¿½Cï¿½Yï¿½ð“¾‚ï¿½ */
+		/* Wave format ‚ÌƒTƒCƒY‚ð“¾‚é */
 		hr = AVIStreamFormatSize(pAviStreamAudio, 0, &lStreamSize);
 		if(hr != 0){
 fprintf(stderr, "can not get audio format size\n");
 			CloseAVI();
-			return false;
+			return FALSE;
 		}
 
-		/* Wave format ï¿½ï¿½ï¿½mï¿½Û‚ï¿½ï¿½ï¿½ */
+		/* Wave format ‚ðŠm•Û‚·‚é */
 		lpwfxWave = (LPWAVEFORMATEX)malloc(lStreamSize > sizeof(WAVEFORMATEX) ? lStreamSize : sizeof(WAVEFORMATEX));
 		if(lpwfxWave == NULL){
 fprintf(stderr, "can not allocate WAVEFORMAT\n");
 			CloseAVI();
-			return false;
+			return FALSE;
 		}
 		ZeroMemory(lpwfxWave, lStreamSize > sizeof(WAVEFORMATEX) ? lStreamSize : sizeof(WAVEFORMATEX));
 
-		/* WAVE format ï¿½ð“¾‚ï¿½ */
+		/* WAVE format ‚ð“¾‚é */
 		hr = AVIStreamReadFormat(pAviStreamAudio, AVIStreamStart(pAviStreamAudio), lpwfxWave, &lStreamSize);
 		if(hr != 0){
 fprintf(stderr, "can not get audio format\n");
 			CloseAVI();
-			return false;
+			return FALSE;
 		}
 
 #ifdef DEBUG
@@ -362,30 +362,30 @@ fprintf(stdout, "cbSize = %d\n", wfxDst.cbSize);
 		wfxDst2.wBitsPerSample = 8;
 		wfxDst2.cbSize = 0;
 
-		/* ï¿½ï¿½ï¿½Ú•ÏŠï¿½ï¿½Å‚ï¿½ï¿½ï¿½H */
+		/* ’¼Ú•ÏŠ·‚Å‚«‚éH */
 		hr = acmStreamOpen(&hasRate, NULL, lpwfxWave, &wfxDst2, NULL, 0, 0, ACM_STREAMOPENF_QUERY);
 		if(!hr){
-			/* ï¿½ï¿½ï¿½Ú•ÏŠï¿½ï¿½ï¿½ï¿½ï¿½ */
+			/* ’¼Ú•ÏŠ·‚·‚é */
 			hr = acmStreamOpen(&hasRate, NULL, lpwfxWave, &wfxDst2, NULL, 0, 0, ACM_STREAMOPENF_NONREALTIME);
 			if(hr){
 				fprintf(stderr, "can not open acm stream\n");
 				CloseAVI();
-				return false;
+				return FALSE;
 			}
 		} else {
-			/* ï¿½Ü‚ï¿½ liner PCM ï¿½Ö•ÏŠï¿½ */
+			/* ‚Ü‚¸ liner PCM ‚Ö•ÏŠ· */
 			hr = acmStreamOpen(&hasFormat, NULL, lpwfxWave, &wfxDst, NULL, 0, 0, ACM_STREAMOPENF_NONREALTIME);
 			if(hr){
 				fprintf(stderr, "can not open acm stream1 %d %d\n", hr,ACMERR_NOTPOSSIBLE	);
 				CloseAVI();
-				return false;
+				return FALSE;
 			}
-			/* ï¿½Äï¿½ï¿½ï¿½ï¿½[ï¿½gï¿½Æ—ÊŽqï¿½ï¿½ï¿½ï¿½ÏŠï¿½ */
+			/* Ä¶ƒŒ[ƒg‚Æ—ÊŽq•‚ð•ÏŠ· */
 			hr = acmStreamOpen(&hasRate, NULL, &wfxDst, &wfxDst2, NULL, 0, 0, ACM_STREAMOPENF_NONREALTIME);
 			if(hr){
 				fprintf(stderr, "can not open acm stream2\n");
 				CloseAVI();
-				return false;
+				return FALSE;
 			}
 		}
 	} else {
@@ -393,13 +393,13 @@ fprintf(stdout, "cbSize = %d\n", wfxDst.cbSize);
 fprintf(stdout, "can not get audio stream\n");
 	}
 
-	/* ï¿½nï¿½ß‚ÌƒXï¿½gï¿½ï¿½ï¿½[ï¿½ï¿½ï¿½Ê’u */
+	/* Žn‚ß‚ÌƒXƒgƒŠ[ƒ€ˆÊ’u */
 	lStreamPosVideo = 0;
 	if(pAviStreamAudio != NULL) lStreamPosAudio = AVIStreamStart(pAviStreamAudio);
 
 	dwWaveDstSize = nWaveDstOfs = 0;
 fprintf(stderr,"ok\n");
-	return true;
+	return TRUE;
 }
 
 
@@ -441,23 +441,23 @@ int AVIGetVideoHeight()
 }
 
 
-bool AVIIsEndAudio()
+BOOL AVIIsEndAudio()
 {
-	if(pAviStreamAudio == NULL) return true;
+	if(pAviStreamAudio == NULL) return TRUE;
 	return lStreamPosAudio == AVIStreamEnd(pAviStreamAudio);
 }
 
 
-bool AVIReadVideo(void* lpDst, int nFrame)
+BOOL AVIReadVideo(LPVOID lpDst, int nFrame)
 {
 	LPBITMAPINFOHEADER		pTmp;
 
 	pTmp = (LPBITMAPINFOHEADER)AVIStreamGetFrame(pGetFrame, nFrame);
-	return Stretch((unsigned char*)lpDst, (unsigned char*)(pTmp + 1));
+	return Stretch((LPBYTE)lpDst, (LPBYTE)(pTmp + 1));
 }
 
 
-bool AVIReadAudio(void* lpDst, int nSize)
+BOOL AVIReadAudio(LPVOID lpDst, int nSize)
 {
 	int		nRead;
 
@@ -465,17 +465,17 @@ bool AVIReadAudio(void* lpDst, int nSize)
 		nRead = nSize;
 		if(nRead > dwWaveDstSize - nWaveDstOfs) nRead = dwWaveDstSize - nWaveDstOfs;
 		if(nRead > 0){
-			CopyMemory(lpDst, (unsigned char*)lpWaveDst + nWaveDstOfs, nRead);
+			CopyMemory(lpDst, (LPBYTE)lpWaveDst + nWaveDstOfs, nRead);
 			nWaveDstOfs += nRead;
 			nSize -= nRead;
-			(unsigned char*)lpDst += nRead;
+			(LPBYTE)lpDst += nRead;
 		}
 		if(nWaveDstOfs >= dwWaveDstSize){
-			if(!readconvAudio()) return false;
+			if(!readconvAudio()) return FALSE;
 			nWaveDstOfs = 0;
 		}
 	}
-	return true;
+	return TRUE;
 }
 
 

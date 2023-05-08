@@ -4,6 +4,8 @@
             "name": "Mac",
             "includePath": [
                 "${workspaceFolder}/**",
+                "/opt/include/**",
+                "/opt/lib/**",
                 "/opt/include"
             ],
             "defines": [],

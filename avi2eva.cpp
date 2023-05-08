@@ -1,141 +1,101 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-//#include <alloc.h>
-//#include "avi.h"
 #include "eva.h"
-#include "mono.h"
+#include "imageops.h"
 #include "video.h"
 
 
-#define	VERSION	8
+#define	VERSION	1
 
 
-bool conv(char* lpszInFile, char* lpszOutFile, int nDstWidth, int nDstHeight, int nFps, int nStartFrame, int nOutFrames, bool bDither, bool bAdjust, bool bMono)
+
+bool convert(char* infile, char* outfile, int fps, bool dither)
 {
-	bool	bResult = false;
-	void*	lpTmp;
-	void*	lpAudioTmp;
-	int		nFrame;
-	int		i;
-	int		nFrameCnt = 0;
-	int		nRate, nScale;
-	int		nMakes = 0;
-	int		nPcmCnt = 0;
-	int		nPcmSize;
-	int		nSrcWidth, nSrcHeight;
+	uint8_t*	pImageFrame;
+	uint8_t*	pAudioFrame;
+	int		noOfFrames;
+	int 	width = XSIZE*2;
+	int		height = YSIZE*2;
+	double 	srcFPS;
+	int		noOfMakes = 0;
+	int		nPcmSize = 0;
+	int		srcWidth, srcHeight;
+	float	duration = 0.0;
 
-	video *v = new video(lpszInFile);
-	//if(OpenAVI(lpszInFile)){
-    if(true){
-		if(CreateEVA(lpszOutFile, nFps != 10)){
-            nFrame = v->getFrameCount(); // 10; // AVIGetVideoFrame();
-            nRate = 5; //AVIGetVideoRate();
-            nScale = 1; // AVIGetVideoScale();
-            nSrcWidth = v->getWidth(); //AVIGetVideoWidth();
-            nSrcHeight = v->getHeight(); //AVIGetVideoHeight();
+	Video *video = new Video(infile);
+    noOfFrames = video->getFrameCount();
+	srcFPS = video->getFramerate();
+    srcWidth = video->getWidth();
+    srcHeight = video->getHeight();
+	duration = video->getLength();
 
-			if(nDstHeight == 0 && nDstWidth == 0){
-				nDstWidth = nSrcWidth;
-				nDstHeight = nSrcHeight;
-			} else if(nDstHeight == 0){
-				if(bAdjust){
-					nDstHeight = nDstWidth * nSrcHeight * 125 / (nSrcWidth * 100);
-				} else {
-					nDstHeight = nDstWidth * nSrcHeight / nSrcWidth;
-				}
-			} else if(nDstWidth == 0){
-				if(bAdjust){
-					nDstWidth = nDstHeight * nSrcWidth * 8 / (nSrcHeight * 10);
-				} else {
-					nDstWidth = nDstHeight * nSrcWidth / nSrcHeight;
-				}
-			} else {
-				if(bAdjust){
-					nDstHeight = nDstWidth * 125 / 100;
-				}
-			}
-			v->prepareScaler(nDstWidth, nDstHeight);
-			//AVISetVideoSize(nDstWidth, nDstHeight);
+	if(fps == 0)  fps = srcFPS;
+	if(fps != srcFPS)
+	{
+		noOfFrames = duration * fps;
+	}
 
-			i = nRate * 100 / nScale;
-			fprintf(stdout, "%s : %dx%d / %d.%02d[Fps]\n", lpszInFile, nSrcWidth, nSrcHeight, i / 100, i % 100);
-			fprintf(stdout, "%s : %dx%d / %d[Fps]\n", lpszOutFile, nDstWidth, nDstHeight, nFps);
+	video->prepareScaler(width, height); //(256 colors, 192x184)
+	video->decodeAllFrames();
+	
+	int decodedFrames = video->getFrames().capacity();
+	
+	 	
+	fprintf(stdout, "%s : %dx%d / %0.2f[Fps], frames : %i, length : %0.2f (sec)\n", infile, srcWidth, srcHeight, srcFPS, video->getFrameCount(), video->getLength() );
+	fprintf(stdout, "%s : %dx%d / %d[Fps], frames : %i, length : %0.2f (sec)\n", outfile, width, height, fps, noOfFrames, (noOfFrames / (float)fps));
 
-			lpTmp = malloc(nDstWidth * nDstHeight * 3 + (15750 / nFps) + 1);
-			if(lpTmp){
-				lpAudioTmp = (void*)((unsigned char*)lpTmp + nDstWidth * nDstHeight * 3);
-				for(i = nStartFrame; i < nFrame;){
-					fprintf(stdout, "\x0d%d/%d(%d)",  i, nFrame-1, nMakes+1);
 
-					/* PCM Size */
-					nPcmCnt += 15750;
-					nPcmSize = nPcmCnt / nFps;
-					nPcmCnt %= nFps;
 
-					/* Read AVI Video */
-					int timestamp = i *  AV_TIME_BASE * (1/nFps);
-					lpTmp = v->getFrameAt(timestamp);
-                    /*
-					if(!AVIReadVideo(lpTmp, i)){
-						fprintf(stdout, "\n");
-						fprintf(stderr, "AVI video read error\n");
-						break;
-					}
-                    */
-                    
-					/* Read AVI Audio */
-                    /*
-					if(!AVIReadAudio(lpAudioTmp, nPcmSize)){
-						fprintf(stdout, "\n");
-						fprintf(stderr, "AVI audio read error\n");
-						break;
-					}
-                    */
-					/* Mono */
-					if(bMono){
-						if(!Mono((unsigned char*)lpTmp, nDstWidth, nDstHeight)){
-							fprintf(stdout, "\n");
-							fprintf(stderr, "mono error\n");
-							break;
-						}
-					}
+	Eva *eva = new Eva(fps);
 
-					/* Convert EVA */
-					if(!ConvEva(lpTmp, nDstWidth, nDstHeight, lpAudioTmp, nPcmSize, bDither, bMono)){
-						fprintf(stdout, "\n");
-						fprintf(stderr, "EVA convert error\n");
-						break;
-					}
-					if(!AppendEVA()){
-						fprintf(stdout, "\n");
-						fprintf(stderr, "EVA write error\n");
-						break;
-					}
+	pImageFrame = (uint8_t*)malloc(width * height * 3); // + (15750 / nFps) + 1);
 
-					nMakes++;
-					if(nOutFrames && nMakes >= nOutFrames) break;
+	//No idea of audio buffer yet
+	//lpAudioTmp = (void*)((unsigned char*)lpTmp + nDstWidth * nDstHeight * 3);
 
-					/* next Frame */
-					nFrameCnt += nRate;
-					if(nFrameCnt > nFps * nScale){
-						i += nFrameCnt / (nFps * nScale);
-						nFrameCnt %= nFps * nScale;
-					}
-				}
+				
+	
+	float frameStep = (decodedFrames / duration) / fps;
+	for(float i = 0.0; i < decodedFrames; i += frameStep )
+	{					
+		int frameIdx = floor(i);
 
-				if(i >= nFrame || nMakes >= nOutFrames){
-					fprintf(stdout, "\n");
-					bResult = true;
-				}
+		//Read AVI Video
+		pImageFrame = video->getFrames()[frameIdx];
+		if(!pImageFrame)
+			pImageFrame = video->getFrames()[frameIdx-1];
 
-				free(lpTmp);
-			} else fprintf(stderr, "memory allocate error\n");
-			CloseEVA();
-		} else fprintf(stderr, "can not open '%s'\n", lpszOutFile);
-		//CloseAVI();
-	} else fprintf(stderr, "can not open '%s'\n", lpszInFile);
-	return bResult;
+		//pAudioFrame = v->getAudioFrames()[frameIdx];
+
+					
+		uint8_t* pConvertedFrame = (uint8_t*)malloc(FRAMESIZE);
+		pConvertedFrame = eva->encodeFrame(pImageFrame, width, width);
+		eva->appendFrame(pConvertedFrame);
+		
+		noOfMakes++;
+		free(pConvertedFrame);
+					
+	}
+				
+	if(noOfMakes == eva->getFrameCount())
+		printf("Re-encoded %i frames\n", eva->getFrameCount());
+	else
+		printf("Error re-encodeding: %i frames encoded, should be %i\n", noOfMakes, eva->getFrameCount());
+
+	//Write file to disk			
+	eva->exportEva3(outfile);
+
+/*
+	nPcmSize = v->getSampleRate() / 2 / fps;
+	printf("pcm: %i, fps: %i\n", nPcmSize, fps);		    
+*/
+	free(pImageFrame);	
+	//free(pAudioFrame);
+	free(eva);
+	
+	
+	return true;
 }
 
 
@@ -143,34 +103,54 @@ void putUsage()
 {
 	fprintf(stdout,
 			"\n"
-			"usage : avi2eva [avi file] [eva file] [options]\n"
+			"usage : avi2eva -i [video file] -o [eva file] [options]\n"
 			"\n"
-			"option: -FPSn     output frame rate\n"
-			"        -VSIZEn   bitmap height\n"
-			"        -HSIZEn   bitmap width\n"
-			"        -FRAMEn   output frames\n"
-			"        -STARTn   start AVI frame number\n"
-			"        -DITHER   use dither pattern\n"
-			"        -ADJUST   adjust aspect ratio\n"
-			"        -MONO     output monochrome image\n"
+			"option: -r (x)    output framerate\n"
+			"        -n		   don't dither output\n"
 	);
 }
 
 
 int main(int argc, char *argv[])
 {
-	int		i;
 	char	*pstrInFile = NULL;
 	char	*pstrOutFile = NULL;
-	int		nFps = 1;
-	int		nWidth = 0, nHeight = 0;
-	int		nStart = 0, nOuts = 0;
-	bool	bDither = false;
-	bool	bAdjust = false;
-	bool	bMono = false;
+	int		nFps = 0;
+	bool	dither = true;
 
-	fprintf(stdout, "AVI to EVA converter Version %d.%d, created by BUPPU.\n", VERSION>>8,VERSION&255);
 
+	fprintf(stdout, "Video to EVA converter Version %d.%d, created by Codeninja.\n", VERSION>>8,VERSION&255);
+	char c;
+    while ((c = getopt (argc, argv, "i:o:r:n")) != -1)
+            switch (c)
+        {
+            case 'i':
+                pstrInFile = optarg;
+                break;
+            case 'o':
+                pstrOutFile = optarg;
+                break;
+            case 'r':
+                nFps = atoi(optarg);
+                break;
+            case 'n':
+                dither = false;
+                break;
+            case '?':
+                if (optopt == 'i' || optopt == 'o' || optopt == 'r')
+                    fprintf (stderr, "Option -%c requires an argument.\n", optopt);
+                else if (isprint (optopt))
+                    fprintf (stderr, "Unknown option `-%c'.\n", optopt);
+                else
+                    fprintf (stderr, "Unknown option character `\\x%x'.\n", optopt);
+                return 1;
+            default:
+                abort();
+        }
+
+                
+
+/*
 	for(i = 1; i < argc; i++){
 		if(*argv[i] == '-'){
 			if(strcmp(argv[i]+1, "h") == 0){
@@ -221,10 +201,12 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
+	*/
+
 	if(pstrInFile == NULL || pstrOutFile == NULL){
 		putUsage();
 		return 1;
 	}
-
-	return conv(pstrInFile, pstrOutFile, nWidth, nHeight, nFps, nStart, nOuts, bDither, bAdjust, bMono) ? 0 : 1;
+	
+	return convert(pstrInFile, pstrOutFile, nFps, true) ? 0 : 1;
 }
