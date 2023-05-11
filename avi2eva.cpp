@@ -1,6 +1,9 @@
+/*
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+*/
+
 #include "eva.h"
 #include "imageops.h"
 #include "video.h"
@@ -10,7 +13,7 @@
 
 
 
-bool convert(char* infile, char* outfile, int fps, bool dither)
+bool convert(char* infile, char* outfile, int fps, bool dither, bool compress)
 {
 	uint8_t*	pImageFrame;
 	uint8_t*	pAudioFrame;
@@ -64,14 +67,16 @@ bool convert(char* infile, char* outfile, int fps, bool dither)
 		//Read AVI Video
 		pImageFrame = video->getFrames()[frameIdx];
 		if(!pImageFrame)
-			pImageFrame = video->getFrames()[frameIdx-1];
-
+		{ 
+			printf("Error decoding frame %i", frameIdx);
+			return -1;
+		}
 		//pAudioFrame = v->getAudioFrames()[frameIdx];
 
 					
 		uint8_t* pConvertedFrame = (uint8_t*)malloc(FRAMESIZE);
-		pConvertedFrame = eva->encodeFrame(pImageFrame, width, width);
-		eva->appendFrame(pConvertedFrame);
+		pConvertedFrame = eva->encodeFrame(pImageFrame, width, height, dither);
+		//eva->appendFrame(pConvertedFrame);
 		
 		noOfMakes++;
 		free(pConvertedFrame);
@@ -83,9 +88,13 @@ bool convert(char* infile, char* outfile, int fps, bool dither)
 	else
 		printf("Error re-encodeding: %i frames encoded, should be %i\n", noOfMakes, eva->getFrameCount());
 
-	//Write file to disk			
-	eva->exportEva3(outfile);
+	//Write file to disk
+	if(compress)
+		eva->exportEva4(outfile);
+	else			
+		eva->exportEva3(outfile);
 
+	
 /*
 	nPcmSize = v->getSampleRate() / 2 / fps;
 	printf("pcm: %i, fps: %i\n", nPcmSize, fps);		    
@@ -107,6 +116,7 @@ void putUsage()
 			"\n"
 			"option: -r (x)    output framerate\n"
 			"        -n		   don't dither output\n"
+			"        -c		   compress frames (EVA4)\n"
 	);
 }
 
@@ -117,11 +127,12 @@ int main(int argc, char *argv[])
 	char	*pstrOutFile = NULL;
 	int		nFps = 0;
 	bool	dither = true;
+	bool	compress = false;
 
 
 	fprintf(stdout, "Video to EVA converter Version %d.%d, created by Codeninja.\n", VERSION>>8,VERSION&255);
 	char c;
-    while ((c = getopt (argc, argv, "i:o:r:n")) != -1)
+    while ((c = getopt (argc, argv, "i:o:r:nc")) != -1)
             switch (c)
         {
             case 'i':
@@ -136,6 +147,9 @@ int main(int argc, char *argv[])
             case 'n':
                 dither = false;
                 break;
+			case 'c':
+				compress = true;
+				break;
             case '?':
                 if (optopt == 'i' || optopt == 'o' || optopt == 'r')
                     fprintf (stderr, "Option -%c requires an argument.\n", optopt);
@@ -148,65 +162,11 @@ int main(int argc, char *argv[])
                 abort();
         }
 
-                
-
-/*
-	for(i = 1; i < argc; i++){
-		if(*argv[i] == '-'){
-			if(strcmp(argv[i]+1, "h") == 0){
-				putUsage();
-				return 0;
-			} else if(strcmp(argv[i]+1,"help") == 0){
-				putUsage();
-				return 0;
-			} else if(strcmp(argv[i]+1,"?") == 0){
-				putUsage();
-				return 0;
-			} else if(strncmp(argv[i]+1,"dither", 6) == 0){
-				bDither = true;
-				continue;
-			} else if(strncmp(argv[i]+1,"fps", 3) == 0){
-				nFps = atoi(argv[i]+4);
-				continue;
-			} else if(strncmp(argv[i]+1, "vsize", 5) == 0){
-				nHeight = atoi(argv[i]+6);
-				continue;
-			} else if(strncmp(argv[i]+1, "hsize", 5) == 0){
-				nWidth = atoi(argv[i]+6);
-				continue;
-			} else if(strncmp(argv[i]+1, "start", 5) == 0){
-				nStart = atoi(argv[i]+6);
-				continue;
-			} else if(strncmp(argv[i]+1, "frame", 5) == 0){
-				nOuts = atoi(argv[i]+6);
-				continue;
-			} else if(strncmp(argv[i]+1, "adjust", 6) == 0){
-				bAdjust = true;
-				continue;
-			} else if(strncmp(argv[i]+1, "mono", 6) == 0){
-				bMono = true;
-				continue;
-			}
-		} else {
-			if(!pstrInFile){				
-				pstrInFile = argv[i];
-				continue;
-			} else if(!pstrOutFile){
-				pstrOutFile = argv[i];
-				continue;
-			}
-		}
-
-		fprintf(stderr, "unknown option '%s'\n", argv[i]);
-		return 1;
-	}
-
-	*/
 
 	if(pstrInFile == NULL || pstrOutFile == NULL){
 		putUsage();
 		return 1;
 	}
 	
-	return convert(pstrInFile, pstrOutFile, nFps, true) ? 0 : 1;
+	return convert(pstrInFile, pstrOutFile, nFps, dither, compress) ? 0 : 1;
 }
