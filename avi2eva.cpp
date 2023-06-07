@@ -13,10 +13,11 @@
 
 
 
-bool convert(char* infile, char* outfile, int fps, bool dither, bool compress)
+bool convert(char* infile, char* outfile, int fps, bool compress, DitherMode ditherMode)
 {
 	uint8_t*	pImageFrame;
 	uint8_t*	pAudioFrame;
+	bool	debugmode = false;
 	int		noOfFrames;
 	int 	width = XSIZE*2;
 	int		height = YSIZE*2;
@@ -52,7 +53,7 @@ bool convert(char* infile, char* outfile, int fps, bool dither, bool compress)
 
 	Eva *eva = new Eva(fps);
 
-	pImageFrame = (uint8_t*)malloc(width * height * 3); // + (15750 / nFps) + 1);
+	pImageFrame = (uint8_t*)malloc(width * height * 3);
 
 	//No idea of audio buffer yet
 	//lpAudioTmp = (void*)((unsigned char*)lpTmp + nDstWidth * nDstHeight * 3);
@@ -75,11 +76,20 @@ bool convert(char* infile, char* outfile, int fps, bool dither, bool compress)
 
 					
 		uint8_t* pConvertedFrame = (uint8_t*)malloc(FRAMESIZE);
-		pConvertedFrame = eva->encodeFrame(pImageFrame, width, height, dither);
-		//eva->appendFrame(pConvertedFrame);
+		pConvertedFrame = eva->encodeFrame(pImageFrame, width, height, ditherMode);
+		if(debugmode)
+		{
+			SavePPM(pImageFrame, width, height);
+			SaveEVA(pConvertedFrame);
+		}
+		
+		uint8_t *pDst =  (uint8_t*)malloc(FRAMESIZE);
+		memcpy(pDst, pConvertedFrame, FRAMESIZE);
+		eva->appendFrame(pDst);
 		
 		noOfMakes++;
 		free(pConvertedFrame);
+		//free(pDst);
 					
 	}
 				
@@ -117,6 +127,9 @@ void putUsage()
 			"option: -r (x)    output framerate\n"
 			"        -n		   don't dither output\n"
 			"        -c		   compress frames (EVA4)\n"
+			"        -d	(x)	   dither mode\n"
+			"        		   0=FloydSteinberg, 1=Sierra, 2=Bayer2, 3=Bayer3\n"
+			"        		   4=Bayer4, 5=Bayer8, 6=Bayer16, 7=None\n"
 	);
 }
 
@@ -125,14 +138,15 @@ int main(int argc, char *argv[])
 {
 	char	*pstrInFile = NULL;
 	char	*pstrOutFile = NULL;
-	int		nFps = 0;
-	bool	dither = true;
+	int		nFps = 0;	
 	bool	compress = false;
+	bool	outputframes = false;
+	DitherMode	ditherMode = FloydSteinberg;
 
 
 	fprintf(stdout, "Video to EVA converter Version %d.%d, created by Codeninja.\n", VERSION>>8,VERSION&255);
 	char c;
-    while ((c = getopt (argc, argv, "i:o:r:nc")) != -1)
+    while ((c = getopt (argc, argv, "i:o:r:d:nc")) != -1)
             switch (c)
         {
             case 'i':
@@ -145,10 +159,16 @@ int main(int argc, char *argv[])
                 nFps = atoi(optarg);
                 break;
             case 'n':
-                dither = false;
+                ditherMode = None;
                 break;
+			case 'd':
+				ditherMode = DitherMode( atoi(optarg) );
+				break;
 			case 'c':
 				compress = true;
+				break;
+			case 'v':
+				outputframes = true;
 				break;
             case '?':
                 if (optopt == 'i' || optopt == 'o' || optopt == 'r')
@@ -168,5 +188,5 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 	
-	return convert(pstrInFile, pstrOutFile, nFps, dither, compress) ? 0 : 1;
+	return convert(pstrInFile, pstrOutFile, nFps, compress, ditherMode) ? 0 : 1;
 }

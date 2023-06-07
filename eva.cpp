@@ -1,5 +1,6 @@
 #include "eva.h"
 
+
 Eva::Eva(const char *infile)
 {
 }
@@ -22,27 +23,60 @@ uint8_t *Eva::getFrameAt(int index)
     return frames[index];
 }
 
-uint8_t * Eva::encodeFrame(uint8_t *pSrc, int width, int height, bool dither)
+uint8_t * Eva::encodeFrame(uint8_t *pSrc, int width, int height, DitherMode ditherMode)
 {
-	if(dither)
-		return encodeFrameDithered(pSrc, width, height);
+	if(ditherMode != None)
+	{
+//		printf("Dithering using %i\n", ditherMode);
+		return encodeFrameDithered(pSrc, width, height, ditherMode);
+	}
 	else
+	{
+//		printf("No dither\n");
 		return encodeFrameUndithered(pSrc, width, height);
+	}
 }
 
-uint8_t * Eva::encodeFrameDithered(uint8_t *pSrc, int width, int height)
+uint8_t * Eva::encodeFrameDithered(uint8_t *pSrc, int width, int height, DitherMode ditherMode)
 {
 
     uint8_t *pBmp = pSrc;
     uint8_t *pDst = NULL;
 	pDst = (uint8_t*)malloc(FRAMESIZE);
 	pBmp = ConvertToGrayscale(pBmp, width, height);	
-	pBmp = Dither(pBmp, width, height, 24);   
+
+	switch (ditherMode)
+	{
+	case FloydSteinberg:
+		pBmp = DitherFS(pBmp, width, height, 24);   
+		break;
+	case Bayer16:
+		DitherBayer16(pBmp, width, height);
+		break;
+	case Bayer8:
+		DitherBayer8(pBmp, width, height);
+		break;
+	case Bayer4:
+		DitherBayer4(pBmp, width, height);
+		break;
+	case Bayer3:
+		DitherBayer3(pBmp, width, height);
+		break;
+	case Bayer2:
+		DitherBayer2(pBmp, width, height);
+		break;
+	case Sierra:
+		DitherSierra(pBmp, width, height);
+		break;
+	default:
+		break;
+	}
+
 	pBmp = FlipVertical(pBmp, width, height);	
 	pBmp = ConvertTo1Bit(pBmp, width, height);
 	
-	unsigned short off=0;
-	unsigned char ytable[5]={0,0,1,2,3};
+	unsigned short off = 0;
+	unsigned char ytable[5] = {0,0,1,2,3};
 	
 
 	int c = 0;
@@ -84,8 +118,8 @@ uint8_t * Eva::encodeFrameDithered(uint8_t *pSrc, int width, int height)
 		off+=XSIZE/4;
 	}
 
-	frames.push_back(pDst);
-    frames.shrink_to_fit();
+//	frames.push_back(pDst);
+//    frames.shrink_to_fit();
     return pDst;
 }
 uint8_t * Eva::encodeFrameUndithered(uint8_t *pSrc, int width, int height)
@@ -143,8 +177,6 @@ uint8_t * Eva::encodeFrameUndithered(uint8_t *pSrc, int width, int height)
 		off+=XSIZE/4;
 	}
 
-	frames.push_back(pDst);
-    frames.shrink_to_fit();
     return pDst;
 }
 void Eva::appendFrame(uint8_t *pFrame)

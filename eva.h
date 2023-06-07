@@ -22,7 +22,7 @@ public:
     ~Eva();
 
     uint8_t *getFrameAt(int index);
-    uint8_t *encodeFrame(uint8_t *pSrc, int width, int height, bool dither);
+    uint8_t *encodeFrame(uint8_t *pSrc, int width, int height, DitherMode ditherMode);
     void dumpInfo();
     void appendFrame(uint8_t* pFrame);
     void exportEva3(const char* file);
@@ -49,7 +49,7 @@ private:
     std::vector<uint8_t*> encodedFrames;
 
 
-    uint8_t *encodeFrameDithered(uint8_t *pSrc, int width, int height);
+    uint8_t *encodeFrameDithered(uint8_t *pSrc, int width, int height, DitherMode ditherMode);
     uint8_t *encodeFrameUndithered(uint8_t *pSrc, int width, int height);
 
 };
